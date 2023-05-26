@@ -1,11 +1,6 @@
 #include "xyz.h"
-#define LENGTH_SENSOR_PIN A0
-#define WIDTH_SENSOR_PIN A1
-#define HEIGHT_SENSOR_PIN A2
 
-float length_voltage_readings = 0;
-float width_voltage_readings = 0;
-float height_voltage_readings = 0;
+XYZ reader(123, 553, 120);
 
 
 void setup(void){
@@ -15,10 +10,14 @@ void setup(void){
 
 
 void loop(void){
+    float volume = 0;
+    
+    volume = reader.get_volume_in_cm();
 
-    length_voltage_readings = analogRead(LENGTH_SENSOR_PIN) * (5 / 1024);
-    width_voltage_readings = analogRead(WIDTH_SENSOR_PIN) * (5 / 1024);
-    height_voltage_readings = analogRead(HEIGHT_SENSOR_PIN) * (5 / 1024);
+    Serial.println(volume, 20);
+
+
+    delay(1000);
 
 
 }
