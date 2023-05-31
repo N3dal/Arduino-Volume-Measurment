@@ -1,6 +1,21 @@
 #ifndef XYZ_H
 #define XYZ_H
 
+#include <SharpIR.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+#define MODEL 1080
+#define WIDTH 128
+#define HEIGHT 64
+#define OLED_RESET -1
+
+#define BOX_LENGTH 0
+#define BOX_WIDTH 0
+#define BOX_HEIGHT 0
+
+
 class XYZ{
 
   private:
@@ -22,6 +37,8 @@ class XYZ{
       length_sensor_pin = &lp;
       width_sensor_pin = &wp;
       height_sensor_pin = &hp;
+
+
     }
 
     ~XYZ(void){
@@ -31,46 +48,44 @@ class XYZ{
 
     }
 
-    float get_length_in_cm(void){
-      float volt_reading = analogRead(*length_sensor_pin);
-      float distance = 13 * pow(volt_reading, -1);
-      // Serial.println(distance);
+    int get_length_in_cm(void){
+      SharpIR length_ir(length_sensor_pin, MODEL);
 
-      return distance;
+      
+
+      return length_ir.distance();
 
     }
 
-    float get_width_in_cm(void){
-      float volt_reading = analogRead(*width_sensor_pin);
-      float distance = 13 * pow(volt_reading, -1);
-      // Serial.println(distance);
-
-      return distance;
+    int get_width_in_cm(void){
+      SharpIR width_ir(width_sensor_pin, MODEL);
+    
+      return width_ir.distance();
     }
 
-    float get_height_in_cm(void){
-      float volt_reading = analogRead(*height_sensor_pin);
-      float distance = 13 * pow(volt_reading, -1);
-      // Serial.println(distance);
+    int get_height_in_cm(void){
+      SharpIR height_ir(height_sensor_pin, MODEL);
 
-      return distance;
+      return height_ir.distance();
     }
 
-    double get_area_in_cm(void){
-      double area = 0;
+    int get_area_in_cm(void){
+      int area = 0;
 
       area = this->get_length_in_cm() * this->get_width_in_cm();
 
       return area;
     }
 
-    double get_volume_in_cm(void){
-      double volume = 0;
+    int get_volume_in_cm(void){
+      int volume = 0;
 
       volume = this->get_length_in_cm() * this->get_width_in_cm() * this->get_height_in_cm();
 
       return volume;
     }
+
+
 };
 
 
