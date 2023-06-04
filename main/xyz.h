@@ -6,87 +6,144 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
-#define MODEL 1080
+
+void oled_print(int);
+void boot_logo(void);
+void print_to_computer(void);
+
+
+#define MODEL1 1080
+#define MODEL2 1080
+#define MODEL3 1080
+
 #define WIDTH 128
 #define HEIGHT 64
 #define OLED_RESET -1
 
-#define BOX_LENGTH 0
-#define BOX_WIDTH 0
+#define BOX_LENGTH 12
+#define BOX_WIDTH 8
 #define BOX_HEIGHT 0
 
+#define LENGTH_SENSOR_PIN A0
+#define WIDTH_SENSOR_PIN A1
+#define HEIGHT_SENSOR_PIN A2
 
-class XYZ{
-
-  private:
-    int *length_sensor_pin;
-    int *width_sensor_pin;
-    int *height_sensor_pin;
-
-    int lp, wp, hp;
-
-  
-
-  public:
-
-    XYZ(int length_pin=0, int width_pin=1, int height_pin=2){
-      lp = length_pin;
-      wp = width_pin;
-      hp =  height_pin;
-
-      length_sensor_pin = &lp;
-      width_sensor_pin = &wp;
-      height_sensor_pin = &hp;
+Adafruit_SSD1306 display(WIDTH, HEIGHT, &Wire, OLED_RESET);
 
 
-    }
 
-    ~XYZ(void){
-      delete length_sensor_pin;
-      delete width_sensor_pin;
-      delete height_sensor_pin;
+SharpIR length_sensor(SharpIR::GP2Y0A21YK0F, LENGTH_SENSOR_PIN);
+SharpIR width_sensor(SharpIR::GP2Y0A21YK0F, WIDTH_SENSOR_PIN);
+SharpIR height_sensor(SharpIR::GP2Y0A21YK0F, HEIGHT_SENSOR_PIN);
 
-    }
+uint8_t button_state = 0;
+int last_reading = 0;
+int length_value = 0;
+int width_value = 0;
+int height_value = 0;
+int volume = 0;
 
-    int get_length_in_cm(void){
-      SharpIR length_ir(length_sensor_pin, MODEL);
 
-      
-
-      return length_ir.distance();
-
-    }
-
-    int get_width_in_cm(void){
-      SharpIR width_ir(width_sensor_pin, MODEL);
+void print_to_computer(void){
+    Serial.print("length: ");
+    Serial.print(length_value);
+    Serial.print("-CM, width: ");
+    Serial.print(width_value);
+    Serial.print("-CM, height: ");
+    Serial.print(height_value);
+    Serial.print("-CM, volume: ");
+    Serial.print(volume);
+    Serial.print("-CM^3");
+    Serial.println();
     
-      return width_ir.distance();
+}
+
+
+void oled_print(int volume){
+    /*
+      show the volume value from the sensors on OLED;
+    */
+
+    display.clearDisplay();
+
+    display.drawRect(0, 0, WIDTH, HEIGHT, WHITE);
+    display.drawLine(90, 0, 90, HEIGHT, WHITE);
+
+
+
+    display.setTextSize(2.3);
+    display.setTextColor(WHITE);
+    display.setCursor(10, 25);
+
+    if (button_state){
+        display.println(String(last_reading));
+        display.setTextSize(1.7);
+        display.setCursor(97, 15);
+        display.println(F("CM^3"));
+        display.setCursor(103, 45);
+        display.println(F("OFF"));
+
+        // FOR SEPERATE CM^3 AND ON/OFF;
+        display.drawLine(90, 44, WIDTH, 27, WHITE);
+
     }
 
-    int get_height_in_cm(void){
-      SharpIR height_ir(height_sensor_pin, MODEL);
+    else{
+        display.println(String(volume));
+        display.setTextSize(1.7);
+        display.setCursor(97, 15);
+        display.println(F("CM^3"));
+        display.setCursor(103, 45);
+        display.println(F("ON"));
 
-      return height_ir.distance();
+        // FOR SEPERATE CM^3 AND ON/OFF;
+        display.drawLine(90, 27, WIDTH, 44, WHITE);
+    }
+    // update the screen;
+    display.display();
+
+
+  }
+
+
+
+  void boot_logo(void){
+  /*
+    simple animation start when we boot up the arduino;
+  */
+
+    display.clearDisplay();
+
+    display.drawRect(0, 10, WIDTH, HEIGHT-18, WHITE);
+
+
+
+    display.setTextSize(2.2);
+    display.setTextColor(WHITE);
+
+    String logo = "XYZ";
+
+    for (int i=0; i<3;i++){
+      display.setCursor(50 + (11*i), 25);
+      display.print(logo[i]);
+      display.display();
+      delay(500);
     }
 
-    int get_area_in_cm(void){
-      int area = 0;
+    delay(10);
 
-      area = this->get_length_in_cm() * this->get_width_in_cm();
-
-      return area;
-    }
-
-    int get_volume_in_cm(void){
-      int volume = 0;
-
-      volume = this->get_length_in_cm() * this->get_width_in_cm() * this->get_height_in_cm();
-
-      return volume;
-    }
+  }
 
 
-};
+void stop_(void){
+  for(;;);
+}
+
+
+
+
+
+
 
 
 #endif
